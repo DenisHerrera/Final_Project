@@ -1,0 +1,558 @@
+{
+	"info": {
+		"_postman_id": "e11dae10-612a-4e1f-8977-aece0b6df9f2",
+		"name": "ProjectDH",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Item",
+			"item": [
+				{
+					"name": "CreateNewItem",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var test = () =>{\r",
+									"    \r",
+									"    pm.test(\"Response time is less than 300ms\", function () {\r",
+									"        pm.expect(pm.response.responseTime).to.be.below(300);\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Status code is 200\", function () {\r",
+									"        pm.response.to.have.status(200);\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"No error message\", function () {\r",
+									"    pm.expect(pm.response.text()).to.not.include(\"ErrorMessage\");\r",
+									"    });\r",
+									"\r",
+									"    pm.test(\"Response must be valid\", function () {\r",
+									"        pm.response.to.be.json;\r",
+									"        pm.response.to.be.ok;\r",
+									"        pm.response.to.be.withBody;\r",
+									"    });\r",
+									"\r",
+									"}\r",
+									"\r",
+									"pm.environment.set(\"tests\", test.toString());\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.environment.set(\"idItem\", jsonData.Id);\r",
+									"\r",
+									"eval(pm.environment.get(\"tests\"))();\r",
+									"\r",
+									"pm.test(\"Check data type\", function () {\r",
+									"    pm.expect(jsonData.Content).to.be.a('string');\r",
+									"    pm.expect(jsonData.Id).to.be.a('number');\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Id whit value between 2 and 14 characters\"), function(){\r",
+									"    pm.expect(jsonData.Content).to.be.lengthOf.within(2,14);\r",
+									"}\r",
+									"\r",
+									"pm.test(\"Check value is false\", function(){\r",
+									"    pm.expect(jsonData.Checked).to.equal(false);\r",
+									"})\r",
+									"\r",
+									"pm.test(\"Item created by logged user\", function(){\r",
+									"    pm.expect(jsonData.OwnerId).to.equal(pm.iterationData.get(\"ownerId\"));\r",
+									"} )"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{passEs}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{emailEs}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"Content\" : \"item1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/items.json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"items.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAllItems",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.environment.get(\"tests\"))();\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Owner field not empty\", function(){\r",
+									"    pm.expect(jsonData.OwnerId).to.not.null;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check  items  of Inbox\", function () {\r",
+									"   pm.expect(jsonData.length).to.eql(Number(pm.iterationData.get(\"nroItem\") + pm.iterationData.get(\"nroItemDone\") +1 ));\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{emailEs}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{passEs}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/items.json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"items.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateItem",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.environment.get(\"tests\"))();\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"id field not change\", function () {   \r",
+									"    pm.expect(jsonData.Id).to.eql(pm.environment.get(\"idItem\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Contend field updated its value\", function(){\r",
+									"    pm.expect(jsonData.Content).to.equal(pm.iterationData.get(\"nuevoNombre\"));\r",
+									"})\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{emailEs}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{passEs}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"Checked\" : false ,\r\n    \"Content\" : \"{{nuevoNombre}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/api/items/{{idItem}}.json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"items",
+								"{{idItem}}.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DelenteItem",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"eval(pm.environment.get(\"tests\"))();\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Deleted item is correct\", function () { \r",
+									"    pm.expect(jsonData.Id).to.eql(pm.environment.get(\"idItem\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Deleted item by autorizate user\", function(){\r",
+									"    pm.expect(jsonData.OwnerId).to.eql(pm.iterationData.get(\"ownerId\"));\r",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "{{emailEs}}",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "{{passEs}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/items/{{idItem}}.json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"items",
+								"{{idItem}}.json"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Filters",
+			"item": [
+				{
+					"name": "ListFilters",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"eval(pm.environment.get(\"tests\"))();\r",
+									"\r",
+									"pm.test(\"Check  position\", function () {\r",
+									"   pm.expect(jsonData[0].Content).to.equal(\"Inbox\");\r",
+									"   pm.expect(jsonData[1].Content).to.equal(\"Today\");\r",
+									"   pm.expect(jsonData[2].Content).to.equal(\"Next\");\r",
+									"   pm.expect(jsonData[3].Content).to.equal(\"Recycle Bin\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check  the Id \", function () {\r",
+									"   pm.expect(jsonData[0].Id).to.equal(0);\r",
+									"   pm.expect(jsonData[1].Id).to.equal(-1);\r",
+									"   pm.expect(jsonData[2].Id).to.equal(-5);\r",
+									"   pm.expect(jsonData[3].Id).to.equal(-3);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"pm.test(\"Check if first position  with id 0  is Inbox\", function () {\r",
+									"   pm.expect(jsonData[0].Content).to.equal(\"Inbox\");\r",
+									"   pm.expect(jsonData[0].Id).to.equal(0);\r",
+									"\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check if Secont position  with id -1  is Today\", function () {\r",
+									"   pm.expect(jsonData[1].Content).to.equal(\"Today\");\r",
+									"   pm.expect(jsonData[1].Id).to.equal(-1);\r",
+									"\r",
+									"});\r",
+									"pm.test(\"Check if third position  with id -5  is Next\", function () {\r",
+									"   pm.expect(jsonData[2].Content).to.equal(\"Next\");\r",
+									"   pm.expect(jsonData[2].Id).to.equal(-5);\r",
+									"\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check if Fourth position  with id -3  is Recycle Bin\", function () {\r",
+									"   pm.expect(jsonData[3].Content).to.equal(\"Recycle Bin\");\r",
+									"   pm.expect(jsonData[3].Id).to.equal(-3);\r",
+									"\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{passEs}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{emailEs}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/filters.json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"filters.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FilterById",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"eval(pm.environment.get(\"tests\"))();\r",
+									"\r",
+									"pm.test(\"Check if Id is equal0\", function () {\r",
+									"   pm.expect(jsonData.Id).to.equal(0);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check Content is equal Inbox\", function () {\r",
+									"   pm.expect(jsonData.Content).to.equal(\"Inbox\");\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{passEs}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{emailEs}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/filters/0.json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"filters",
+								"0.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "FilterItemById",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"eval(pm.environment.get(\"tests\"))();\r",
+									"\r",
+									"pm.test(\"Check number of items in Inbox\", function () { \r",
+									"    pm.expect(jsonData.length).to.eql(pm.iterationData.get(\"nroItem\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{passEs}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{emailEs}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/filters/0/items.json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"filters",
+								"0",
+								"items.json"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DoneItem",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();\r",
+									"eval(pm.environment.get(\"tests\"))();\r",
+									"\r",
+									"pm.test(\"Check number of done items in Inbox\", function () {\r",
+									"   pm.expect(jsonData.length).to.equals(pm.iterationData.get(\"nroItemDone\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Check ItemType field is valid\", function () {\r",
+									"    if(jsonData.length > 0){\r",
+									"        pm.expect(jsonData[0].ItemType).to.equal(3);\r",
+									"        pm.expect(jsonData[0].ItemType).to.be.a(\"number\");\r",
+									"    }\r",
+									"});\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{passEs}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{emailEs}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/api/filters/0/doneitems.json",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"api",
+								"filters",
+								"0",
+								"doneitems.json"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
